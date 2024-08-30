@@ -1,0 +1,121 @@
+import { getVideoId } from '@/utils';
+// import { setVideoId } from '@/redux/tabsSlice';
+// import { store } from '@/redux/store';
+import { CloseTabMessage, DislikeVideoMessage, LikeVideoMessage, BgMessageHandler, TogglePlayVideoMessage, UpdateTabDataMessage, BgMessageEnum, ContentMessagesEnum, Video } from '@/models';
+
+// type VideoIdResponse = {
+//   success: boolean,
+//   videoId?: string
+// };
+
+// export const getVideoIdListener = (request: { type: string, url: URL | string }, _sender: chrome.runtime.MessageSender, sendResponse: (response: VideoIdResponse) => void) => {
+//   if (request.type === 'GET_VIDEO_ID') {
+//     const videoId = getVideoId(request.url);
+    
+//     if (videoId) {
+//       sendResponse({ success: true, videoId });
+//       return true; 
+//     }
+
+//     sendResponse({ success: false });
+//     return false; 
+//   }
+// };
+
+export const likeVideoListener: BgMessageHandler<LikeVideoMessage> = (message) => {
+  if (message.type === BgMessageEnum.LIKE_VIDEO) {
+
+    console.log(message.payload.tabId)
+    chrome.tabs.sendMessage(message.payload.tabId, { type: ContentMessagesEnum.LIKE_VIDEO, isLiked: message.payload.isLiked }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error sending message to tab:', chrome.runtime.lastError);
+      } else if (response && response.success) {
+        console.log('Video liked successfully.');
+      } else {
+        console.error('Failed to trigger video play:', response?.error);
+      }
+    });
+  }
+};
+
+export const dislikeVideoListener: BgMessageHandler<DislikeVideoMessage> = (message) => {
+  if (message.type === BgMessageEnum.DISLIKE_VIDEO) {
+
+    chrome.tabs.sendMessage(message.payload.tabId, { type: ContentMessagesEnum.DISLIKE_VIDEO, isDisliked: message.payload.isDisliked }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error sending message to tab:', chrome.runtime.lastError);
+      } else if (response && response.success) {
+        console.log('Video disliked successfully.');
+      } else {
+        console.error('Failed to trigger video play:', response?.error);
+      }
+    });
+  }
+};
+
+export const closeTabListener: BgMessageHandler<CloseTabMessage> = (message) => {
+  if (message.type === BgMessageEnum.CLOSE_TAB) {
+    chrome.tabs.remove(message.payload.tabId, () => {
+      if (chrome.runtime.lastError) {
+        console.error('Error closing tab:', chrome.runtime.lastError);
+      } else {
+        console.log('Tab closed successfully');
+      }
+    });
+  }
+};
+
+export const togglePlayVideoListener: BgMessageHandler<TogglePlayVideoMessage> = (message) => {
+  if (message.type === BgMessageEnum.TOGGLE_PLAY_VIDEO) {
+    chrome.tabs.sendMessage(message.payload.tabId, { type: ContentMessagesEnum.TOGGLE_PLAY_VIDEO, isPlaying: message.payload.isPlaying }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error sending message to tab:', chrome.runtime.lastError);
+      } else if (response && response.success) {
+        console.log('Video play triggered successfully.');
+      } else {
+        console.error('Failed to trigger video play:', response?.error);
+      }
+    });
+  }
+};
+
+export const updateTabDataListener: BgMessageHandler<UpdateTabDataMessage> = (message, sender) => {
+  if (sender && sender.tab && sender.tab.url) {
+    const videoId = getVideoId(new URL(sender.tab.url));
+    console.log('tab', sender.tab);
+
+    if (!videoId) {
+      return;
+    }
+
+    // store.dispatch(setVideoId(videoId));
+    const videoUpdate: Pick<Video, 'id'> & Partial<Pick<Video, 'isLiked' | 'isDisliked' | 'isPlaying'>> = { id: videoId };
+    const { payload, type } = message;
+    const { id: tabId } = sender.tab;
+
+    if (type === BgMessageEnum.UPDATE_TAB_DATA) {
+      if (typeof payload.isPlaying !== 'undefined') {
+        videoUpdate.isPlaying = payload.isPlaying;
+      }
+
+      if (typeof payload.isLiked !== 'undefined') {
+        videoUpdate.isLiked = payload.isLiked;
+        if (payload.isLiked) {
+          videoUpdate.isDisliked = false;
+        }
+      }
+
+      if (typeof payload.isDisliked !== 'undefined') {
+        videoUpdate.isDisliked = payload.isDisliked;
+        if (payload.isDisliked) {
+          videoUpdate.isLiked = false;
+        }
+      }
+
+      if (tabId) {
+        console.log(tabId);
+        // store.dispatch(updateVideoById(videoUpdate));
+      }
+    }
+  }
+};

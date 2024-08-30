@@ -1,0 +1,132 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* Styles Import */
+@import "./assets/styles/Icons.scss";
+@import "simplebar-react/dist/simplebar.min.css";
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --white: theme('colors.white');
+  --w-8: 2rem;
+  --h-8: 2rem;
+  --max-popup-height: 37.5rem;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+.popup-wrapper {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  width: 480px;
+  max-height: 600px;
+  overflow-y: hidden
+}
+
+.statistic-page {
+  height: 100vh;
+  width: 100vw;
+  background: var(--white);
+}
+
+.videos-container {
+  max-height: calc(var(--max-popup-height) - 3rem);
+  height: auto;
+}
+
+
+.simplebar-scrollbar:before {  
+	border-radius: 6px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.2);
+  box-shadow: inset 0 0 6px rgba(0,0,0,.2);
+	background-color: #777;
+
+}
+/* .custom-scroll {
+  overflow-y: auto;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  position: absolute;
+  -webkit-box-shadow: inset 0 0 6px transparent;
+  border-radius: 6px;
+  background-color: #242424;
+}
+
+.custom-scroll::-webkit-scrollbar {
+	width: 8px;
+  height: 8px;
+	background-color: #242424;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+	border-radius: 6px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+} */
+
+
+.garage-title {
+  clear: both;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+}

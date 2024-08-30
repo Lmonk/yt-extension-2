@@ -1,0 +1,5 @@
+export enum ContentMessagesEnum {
+  LIKE_VIDEO = 'LIKE_VIDEO',
+  DISLIKE_VIDEO = 'DISLIKE_VIDEO',
+  TOGGLE_PLAY_VIDEO = 'TOGGLE_PLAY_VIDEO'
+}
