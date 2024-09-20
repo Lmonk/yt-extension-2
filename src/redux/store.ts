@@ -1,11 +1,11 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { tabsReducer } from '@/redux/tabsSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import { tabsReducer } from "@/redux/tabsSlice";
 
 export const store = configureStore({
   reducer: {
-    tabs: tabsReducer
+    tabs: tabsReducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware()
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

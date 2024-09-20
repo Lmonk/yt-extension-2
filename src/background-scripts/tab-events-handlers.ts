@@ -1,65 +1,83 @@
-import { addTabById, removeTabById, setActiveTabs, setTabs } from '@/redux/tabsSlice';
-import { store } from '@/redux/store.ts';
-import { getVideoId } from '@/utils';
-import { TabCreatePayload, TabUpdatePayload, Tabs } from '@/models';
+import {
+  addTabById,
+  removeTabById,
+  setActiveTabs,
+  setTabs,
+} from "@/redux/tabsSlice";
+import { store } from "@/redux/store.ts";
+import { getVideoId } from "@/utils";
+import { TabCreatePayload, Tabs } from "@/models";
+import { startHeartbeat } from "./continuous-worker.ts";
 
-export const handleTabCreated = (tab: chrome.tabs.Tab) => {
-  const { url, id, title, windowId, lastAccessed } = tab;
-  if (id && url && title) {
-    const videoId = getVideoId(new URL(url));   
+export const handleTabCreated = async (tab: chrome.tabs.Tab) => {
+  const { id, windowId, lastAccessed } = tab;
+  if (id) {
     const date = Date.now();
+    const tabData = await chrome.tabs.get(id);
 
-    if (videoId) {
-      const tabToCreate: TabCreatePayload = {
-        tabId: id,
-        title,
-        url,
-        windowId,
-        date,
-        video: {
-          id: videoId,
-          isPlaying: false,
-          isLiked: false,
-          isDisliked: false
+    if (tabData.url && tabData.title) {
+      const videoId = getVideoId(new URL(tabData.url));
+
+      if (videoId) {
+        const tabToCreate: TabCreatePayload = {
+          tabId: id,
+          title: tabData.title,
+          url: tabData.url,
+          windowId,
+          date,
+          video: {
+            id: videoId,
+            isPlaying: false,
+            isLiked: false,
+            isDisliked: false,
+          },
+        };
+
+        if (lastAccessed) {
+          tabToCreate.lastAccessed = lastAccessed;
         }
-      };
+        console.log("tab create", tabToCreate);
 
-      if(lastAccessed) {
-        tabToCreate.lastAccessed = lastAccessed;
+        store.dispatch(addTabById({ ...tabToCreate }));
       }
-
-      store.dispatch(addTabById({...tabToCreate}));
     }
   }
 };
 
-export const handleTabUpdated = (
+export const handleTabUpdated = async (
   _tabId: number,
   changeInfo: chrome.tabs.TabChangeInfo,
   tab: chrome.tabs.Tab
 ) => {
-  const { id, title, windowId, lastAccessed } = tab;
-  if (id && changeInfo.url && title) {
-    const videoId = getVideoId(new URL(changeInfo.url));
-    const date = Date.now();
+  if (changeInfo.status === "complete") {
+    const { id, url, title, windowId, lastAccessed } = tab;
 
-    if (videoId) { 
-      const tab: TabUpdatePayload = {        
-        video: {
-          id: videoId,
-          isPlaying: false,
-          isLiked: false,
-          isDisliked: false
-        },
-        tabId: id,
-        title,
-        date,
-        url: changeInfo.url,
-        windowId,
-        lastAccessed
-      };
+    if (id && url && title) {
+      const videoId = getVideoId(new URL(url));
+      const date = Date.now();
 
-      store.dispatch(addTabById({...tab}));
+      if (videoId) {
+        const tabToUpdate: TabCreatePayload = {
+          tabId: id,
+          title,
+          url,
+          windowId,
+          date,
+          video: {
+            id: videoId,
+            isPlaying: true,
+            isLiked: false,
+            isDisliked: false,
+          },
+        };
+
+        if (lastAccessed) {
+          tabToUpdate.lastAccessed = lastAccessed;
+        }
+
+        console.log("tab update", tabToUpdate);
+        store.dispatch(addTabById({ ...tabToUpdate }));
+      }
     }
   }
 };
@@ -69,14 +87,15 @@ export const handleTabRemoved = (tabId: number) => {
   store.dispatch(removeTabById({ tabId }));
 };
 
-export const initializeTabs = () => {  
+export const initializeTabs = () => {
   const activeIds: number[] = [];
+  startHeartbeat();
 
-  chrome.tabs.query({ active: true }, (tabs) => { 
-    console.log('activeTabs', tabs)
+  chrome.tabs.query({ active: true }, (tabs) => {
+    // console.log("activeTabs", tabs);
     tabs.forEach((tab) => {
       const { url, id } = tab;
-      if(url && id) {
+      if (url && id) {
         const videoId = getVideoId(url);
 
         if (videoId) {
@@ -90,7 +109,6 @@ export const initializeTabs = () => {
 
   chrome.tabs.query({}, (tabs) => {
     const tabsMap: Tabs = {};
-    console.log(tabs);
 
     tabs.forEach((tab) => {
       const { url, id: tabId, title, windowId, lastAccessed } = tab;
@@ -101,21 +119,21 @@ export const initializeTabs = () => {
         if (videoId) {
           tabsMap[tabId] = {
             lastAccessed,
-            video: {       
-              id: videoId,       
+            video: {
+              id: videoId,
               isLiked: false,
               isDisliked: false,
-              isPlaying: false
+              isPlaying: false,
             },
             windowId,
             date: Date.now(),
-            title: title.replace(' - YouTube', ''),
+            title: title.replace(" - YouTube", ""),
             url,
           };
         }
       }
     });
-    
+
     store.dispatch(setTabs(tabsMap));
   });
 };
