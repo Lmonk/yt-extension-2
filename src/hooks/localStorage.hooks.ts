@@ -1,4 +1,3 @@
-// import { useCallback } from 'react';
 import { Video } from "@/models";
 import { useDispatch } from "react-redux";
 import { setTabs } from "@/redux/tabsSlice";
@@ -31,16 +30,6 @@ const useLocalStorage = () => {
   return () => {
     window.removeEventListener("storage", handleStorageEvent);
   };
-  // const addVideoMap = useCallback(
-  //   (video: Video) => {
-  //     setVideoMap((prevState: Map<string, Video>) => {
-  //       const newMap = new Map(prevState);
-
-  //       return newMap.set(video.url, video);
-  //     })
-  //   },
-  //   [setVideoMap]
-  // );
 };
 
 const localStorageHooks = {

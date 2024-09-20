@@ -1,7 +1,3 @@
-import {
-  filterOutShorts,
-  filterOutShortsFromRecomendations,
-} from "./default.ts";
 import { onPageLoaded } from "./tab.ts";
 import { getVideoStatus } from "./video.ts";
 import { BgMessageEnum, ContentMessagesEnum } from "@/models";
@@ -20,29 +16,6 @@ const playListener = () => {
     type: BgMessageEnum.UPDATE_TAB_DATA,
     payload: { isPlaying: true },
   });
-
-  // chrome.runtime.sendMessage({ type: 'GET_ALL_VIDEO_IDS'}, async (response) => {
-  //   console.log(response)
-  //   const { videoIds } = response;
-  //   const result: {[key: string]: number[] | null} = {};
-  //   const colorThief = new ColorThief();
-
-  //   const results = await Promise.all(
-  //     videoIds.map(async (id: string) => {
-  //       const imgUrl = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-  //       const colors = await colorThief.getPaletteAsync(imgUrl, 5, {colorType: "array"});
-
-  //       return { id, colors };
-  //     })
-  //   );
-
-  //   results.forEach(({ id, colors }) => {
-  //     result[id] = colors;
-  //   });
-
-  //   console.log('GET_TEXT_COLORS_RESULT', result)
-  //   chrome.runtime.sendMessage({ type: 'SET_TEXT_COLORS', payload: { textColors: result }})
-  // });
 };
 
 const pauseListener = () => {
@@ -135,37 +108,7 @@ function removeEventListenerFromLikesElement() {
   }
 }
 
-function addEventListenerToShortsRecomendationElement() {
-  const shortsRecomendationsElem = document.querySelector(
-    "ytd-watch-next-secondary-results-renderer ytd-reel-shelf-renderer"
-  );
-
-  if (shortsRecomendationsElem) {
-    shortsRecomendationsElem.addEventListener(
-      "load",
-      filterOutShortsFromRecomendations
-    );
-  } else {
-    setTimeout(addEventListenerToShortsRecomendationElement, 1000);
-  }
-}
-
-function removeEventListenerToShortsRecomendationElement() {
-  const shortsRecomendationsElem = document.querySelector(
-    "ytd-watch-next-secondary-results-renderer ytd-reel-shelf-renderer"
-  );
-
-  if (shortsRecomendationsElem) {
-    shortsRecomendationsElem.removeEventListener(
-      "load",
-      filterOutShortsFromRecomendations
-    );
-  }
-}
-
 (function () {
-  window.addEventListener("load", filterOutShorts);
-
   if (!window.location.href.startsWith("https://www.youtube.com/watch?v=")) {
     return;
   }
@@ -180,16 +123,12 @@ function removeEventListenerToShortsRecomendationElement() {
   });
 
   window.addEventListener("load", () => {
-    // chrome.runtime.sendMessage({ type: 'UPDATE_TAB_DATA_SW', payload: { isPlaying: true }});
-
     addEventListenerToVideoElement();
     addEventListenerToLikesElement();
-    addEventListenerToShortsRecomendationElement();
 
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (message.type === "GET_VIDEO_STATUS") {
         const result = getVideoStatus();
-        // console.log("GET_VIDEO_STATUS", result);
         if (result) {
           sendResponse({ success: true, result });
         } else {
@@ -213,7 +152,6 @@ function removeEventListenerToShortsRecomendationElement() {
     });
 
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-      // console.log(message, _sender);
       if (message.type === ContentMessagesEnum.LIKE_VIDEO) {
         const likeElement = document.querySelector(
           "#primary-inner ytd-watch-metadata like-button-view-model button"
@@ -249,6 +187,5 @@ function removeEventListenerToShortsRecomendationElement() {
   window.addEventListener("beforeunload", () => {
     removeEventListenerFromVideoElement();
     removeEventListenerFromLikesElement();
-    removeEventListenerToShortsRecomendationElement();
   });
 })();

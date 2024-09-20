@@ -90,7 +90,6 @@ export const initializeTabs = () => {
   const activeIds: number[] = [];
 
   chrome.tabs.query({ active: true }, (tabs) => {
-    // console.log("activeTabs", tabs);
     tabs.forEach((tab) => {
       const { url, id } = tab;
       if (url && id) {

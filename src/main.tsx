@@ -5,18 +5,6 @@ import { Store } from "webext-redux";
 import App from "@/App.tsx";
 import "@/index.css";
 
-// chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-//   const url = tabs[0].url;
-
-//   if(url) {
-//     const currentUrl = new URL(url);
-
-//     if (!currentUrl.searchParams.has('v') && currentUrl.protocol !== "chrome-extension:") {
-//       window.close();
-//     }
-//   }
-// });
-
 const store = new Store();
 
 store.ready().then(() => {

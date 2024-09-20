@@ -25,7 +25,6 @@ const slice = createSlice({
   initialState,
   reducers: {
     setTabs: (state, action: PayloadAction<Tabs>) => {
-      console.log("setTabs", action.payload);
       return {
         ...state,
         tabsMap: action.payload,

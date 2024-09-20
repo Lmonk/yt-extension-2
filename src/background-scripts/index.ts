@@ -85,7 +85,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "SET_VIDEO_COLORS") {
-    console.log("SET_VIDEO_COLORS", message.result);
     store.dispatch(setVideoColors({ ...message.result }));
   }
 });
@@ -98,17 +97,15 @@ const getChromeStorage = (keys: string[]): Promise<any> => {
   });
 };
 
-// Get both chrome.storage.local items
 const loadInitialState = async () => {
+  // Get state from chrome.storage.local
   const [{ state }] = await Promise.all([getChromeStorage(["state"])]);
   if (state?.tabs) {
     const { tabsMap, videoColors } = state.tabs;
 
-    // Dispatch tabsMap if not empty
     store.dispatch(setTabs(tabsMap));
-
-    // Dispatch videoColors if not empty
     store.dispatch(setVideoColors(videoColors));
+
     initializeTabs();
 
     // Now subscribe to store changes and save state

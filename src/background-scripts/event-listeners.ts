@@ -1,5 +1,3 @@
-// import { setVideoId } from '@/redux/tabsSlice';
-// import { store } from '@/redux/store';
 import {
   CloseTabMessage,
   DislikeVideoMessage,
@@ -14,30 +12,10 @@ import {
 import { store } from "../redux/store.ts";
 import { updateVideoStatusByTabId } from "@/redux/tabsSlice";
 
-// type VideoIdResponse = {
-//   success: boolean,
-//   videoId?: string
-// };
-
-// export const getVideoIdListener = (request: { type: string, url: URL | string }, _sender: chrome.runtime.MessageSender, sendResponse: (response: VideoIdResponse) => void) => {
-//   if (request.type === 'GET_VIDEO_ID') {
-//     const videoId = getVideoId(request.url);
-
-//     if (videoId) {
-//       sendResponse({ success: true, videoId });
-//       return true;
-//     }
-
-//     sendResponse({ success: false });
-//     return false;
-//   }
-// };
-
 export const likeVideoListener: BgMessageHandler<LikeVideoMessage> = (
   message
 ) => {
   if (message.type === BgMessageEnum.LIKE_VIDEO) {
-    console.log(message.payload.tabId);
     chrome.tabs.sendMessage(
       message.payload.tabId,
       {
@@ -138,7 +116,6 @@ export const updateTabDataListener: BgMessageHandler<UpdateTabDataMessage> = (
       return;
     }
 
-    // store.dispatch(setVideoId(videoId));
     const tabUpdate: UpdateVideoStatusPayload = {
       video: {},
     };
