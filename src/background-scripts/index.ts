@@ -1,5 +1,5 @@
 import { createWrapStore } from "webext-redux";
-import { store } from "../redux/store.ts";
+import { store } from "@/redux/store";
 import {
   likeVideoListener,
   dislikeVideoListener,
@@ -16,46 +16,18 @@ import {
 import { BgMessage, BgMessageEnum, BgMessageHandler } from "@/models";
 import "@/background-scripts/messages-from-content.ts";
 import { getVideoId } from "@/utils/video.ts";
-import { setVideoColors } from "@/redux/tabsSlice.ts";
+import { setTabs, setVideoColors } from "@/redux/tabsSlice.ts";
+import { throttle } from "@/utils/helpers";
 
 const wrapStore = createWrapStore();
+
 wrapStore(store);
 
-initializeTabs();
+const saveState = () => {
+  const state = store.getState();
 
-// chrome.storage.local.get(["initialized"], (result) => {
-//   console.log(result);
-//   if (!result.initialized) {
-//     // Run store wrapper for the first session
-//     wrapStore(store);
-
-//     initializeTabs();
-//     // Set the firstSession flag to prevent future runs in this session
-//     chrome.storage.local.set({ initialized: true }, () => {
-//       const currentTime = new Date();
-//       const hours = currentTime.getHours().toString().padStart(2, "0"); // Ensures 2 digits
-//       const minutes = currentTime.getMinutes().toString().padStart(2, "0");
-//       const seconds = currentTime.getSeconds().toString().padStart(2, "0");
-//       console.log(`Current Time: ${hours}:${minutes}:${seconds}`);
-//       console.log("firstSession flag set for this session.");
-//     });
-//   } else {
-//     console.log("Store wrapper already initialized in this session.");
-//   }
-// });
-
-chrome.windows.onRemoved.addListener((windowId) => {
-  console.log(`Window ${windowId} closed`);
-
-  chrome.windows.getAll({}, (windows) => {
-    if (windows.length === 0) {
-      console.log("All windows closed. Likely browser shutdown.");
-      chrome.storage.local.set({ initialized: false }, () => {
-        console.log("Set initialized false.");
-      });
-    }
-  });
-});
+  chrome.storage.local.set({ state });
+};
 
 const messageHandlers: {
   [K in BgMessageEnum]: BgMessageHandler<Extract<BgMessage, { type: K }>>;
@@ -117,3 +89,33 @@ chrome.runtime.onMessage.addListener((message) => {
     store.dispatch(setVideoColors({ ...message.result }));
   }
 });
+
+// Function to get chrome storage items as a Promise
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getChromeStorage = (keys: string[]): Promise<any> => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(keys, resolve);
+  });
+};
+
+// Get both chrome.storage.local items
+const loadInitialState = async () => {
+  const [{ state }] = await Promise.all([getChromeStorage(["state"])]);
+  if (state?.tabs) {
+    const { tabsMap, videoColors } = state.tabs;
+
+    // Dispatch tabsMap if not empty
+    store.dispatch(setTabs(tabsMap));
+
+    // Dispatch videoColors if not empty
+    store.dispatch(setVideoColors(videoColors));
+    initializeTabs();
+
+    // Now subscribe to store changes and save state
+    const [throttledSave] = throttle(saveState, 1000);
+    store.subscribe(throttledSave);
+  }
+};
+
+// Run the function to load initial state and set up store subscription
+loadInitialState();

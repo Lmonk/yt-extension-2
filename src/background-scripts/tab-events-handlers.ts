@@ -7,7 +7,6 @@ import {
 import { store } from "@/redux/store.ts";
 import { getVideoId } from "@/utils";
 import { TabCreatePayload, Tabs } from "@/models";
-import { startHeartbeat } from "./continuous-worker.ts";
 
 export const handleTabCreated = async (tab: chrome.tabs.Tab) => {
   const { id, windowId, lastAccessed } = tab;
@@ -89,7 +88,6 @@ export const handleTabRemoved = (tabId: number) => {
 
 export const initializeTabs = () => {
   const activeIds: number[] = [];
-  startHeartbeat();
 
   chrome.tabs.query({ active: true }, (tabs) => {
     // console.log("activeTabs", tabs);
