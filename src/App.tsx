@@ -1,6 +1,5 @@
 import StatisticPage from "@/pages/StatisticPage.tsx";
 import { HashRouter as Router, Route, Routes } from "react-router-dom";
-import "./App.css";
 import ExtensionPopup from "@/pages/ExtensionPopup";
 
 function App() {
