@@ -1,50 +1,62 @@
-# React + TypeScript + Vite
+# Youtube Extension
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+**Youtube Extension** is a Chrome extension designed to monitor and manage all your YouTube video tabs in one place. It provides a clean interface displaying each tab's video status, title, and thumbnail, allowing you to easily switch between or manage multiple open YouTube tabs.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- Track all open YouTube tabs in your browser.
+- Display video statuses (playing, paused) in real-time.
+- View the title and thumbnail of each YouTube video.
+- Easily manage, pause, or switch between different YouTube tabs.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Installation
 
-- Configure the top-level `parserOptions` property like this:
+To install **Youtube Extension** and get it running locally, follow these steps:
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+1. Clone the repository:
+
+```
+git clone https://github.com/Lmonk/yt-extension-2.git
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+2. Navigate to the project directory:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```sh
+cd yt-extension-2
 ```
+
+3. Install dependencies:
+
+```sh
+npm install
+```
+
+## Building the Extension
+
+After installation, you need to build the project before adding it to Chrome:
+
+```sh
+npm run build
+```
+
+This will create the dist directory, which contains the compiled extension files.
+
+## Adding the Extension to Chrome
+
+To use the extension in Chrome:
+
+1. Open Chrome and navigate to chrome://extensions/.
+2. Enable Developer mode by toggling the switch in the top-right corner.
+3. Click Load unpacked and select the dist directory from the root of the cloned project.
+4. The extension will now appear in your Chrome extensions bar.
+
+## Usage
+
+Once the extension is installed:
+
+1. Click on the extension icon in the toolbar.
+2. A popup will display all currently open YouTube tabs.
+3. Use the interface to manage or view each video’s status (e.g., play, pause).
+4. Easily navigate between your open YouTube tabs using the provided thumbnails and titles.
